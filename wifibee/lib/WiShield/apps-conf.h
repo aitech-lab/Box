@@ -46,15 +46,15 @@
 //
 //#define APP_WEBSERVER
 //#define APP_WEBCLIENT
-//#define APP_SOCKAPP
-//#define APP_UDPAPP
-#define APP_WISERVER
+#define APP_SOCKAPP
+#define APP_UDPAPP
+//#define APP_WISERVER
 
 //
 // Add on features; uncomment to enable additional functionality
 //
 //#define UIP_DNS                  // Add DNS capabilities - APP_UDPAPP must be defined!
-//#define UIP_DHCP                 // Add DHCP capabilities - APP_UDPAPP must be defined!
+#define UIP_DHCP                 // Add DHCP capabilities - APP_UDPAPP must be defined!
 //#define UIP_SCAN                 // Add Access Point scan capabilities
 
 //
