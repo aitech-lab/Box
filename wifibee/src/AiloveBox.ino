@@ -1,14 +1,13 @@
 /*
- * Socket App
- *
- * A simple socket application example using the WiShield 1.0
+ * A simple sketch that uses WiServer to get the hourly weather data from LAX and prints
+ * it via the Serial API
  */
 
-#include <WiShield.h>
+#include <WiServer.h>
 
 // Wireless configuration parameters ----------------------------------------
 unsigned char local_ip[]    = {10,0,0,24};   // IP address of WiShield
-unsigned char gateway_ip[]  = {10,0,0,1};   // router or gateway IP address
+unsigned char gateway_ip[]  = {10,0,0, 1};   // router or gateway IP address
 unsigned char subnet_mask[] = {255,255,255,0}; // subnet mask for the local network
 char ssid[]                 = {"fuckoff"};   // max 32 bytes
 unsigned char security_type = 3;               // 0 - open; 1 - WEP; 2 - WPA; 3 - WPA2
@@ -32,8 +31,7 @@ unsigned char ssid_len;
 unsigned char security_passphrase_len;
 // End of wireless configuration parameters ----------------------------------------
 
-
-
+boolean waitServerResponse = false;
 
 // Function that prints data from the server
 void printData(char* data, int len) {
@@ -44,39 +42,45 @@ void printData(char* data, int len) {
   while (len-- > 0) {
     Serial.print(*(data++));
   } 
+  Serial.println("END");
+  waitServerResponse = false;
 }
 
 
 // IP Address for www.weather.gov  
-uint8 ip[] = {140,90,113,200};
+uint8 ip[] = {10,0,0,9};
 
 // A request that gets the latest METAR weather data for LAX
-GETrequest getWeather(ip, 80, "www.weather.gov", "/data/METAR/KLAX.1.txt");
+GETrequest pingServer(ip, 8515, "10.0.0.9", "/");
 
 
 void setup() {
-    // Initialize WiServer (we'll pass NULL for the page serving function since we don't need to serve web pages) 
+  Serial.begin(57600);
+  Serial.println("WebServer Init");
+  // Initialize WiServer (we'll pass NULL for the page serving function since we don't need to serve web pages) 
   WiServer.init(NULL);
   
   // Enable Serial output and ask WiServer to generate log messages (optional)
-  Serial.begin(57600);
   WiServer.enableVerboseMode(true);
 
   // Have the processData function called when data is returned by the server
-  getWeather.setReturnFunc(printData);
+  pingServer.setReturnFunc(printData);
 }
 
 
 // Time (in millis) when the data should be retrieved 
-long updateTime = 0;
+
 
 void loop(){
-
+  static long updateTime = millis();
   // Check if it's time to get an update
-  if (millis() >= updateTime) {
-    getWeather.submit();    
+  long time = millis();
+  if (time >= updateTime && !waitServerResponse) {
+    Serial.println("Ping Server");
+    waitServerResponse = true;
+    pingServer.submit();    
     // Get another update one hour from now
-    updateTime += 1000 * 60 * 60;
+    updateTime = time+1000 * 10;
   }
   
   // Run WiServer
