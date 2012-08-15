@@ -33,41 +33,54 @@ unsigned char security_passphrase_len;
 // End of wireless configuration parameters ----------------------------------------
 
 
-void setup()
-{
-	WiFi.init();
+
+
+// Function that prints data from the server
+void printData(char* data, int len) {
+  
+  // Print the data returned by the server
+  // Note that the data is not null-terminated, may be broken up into smaller packets, and 
+  // includes the HTTP header. 
+  while (len-- > 0) {
+    Serial.print(*(data++));
+  } 
 }
 
-unsigned char loop_cnt = 0;
 
-// The stack does not have support for DNS and therefore cannot resolve
-// host names. It needs actual IP addresses of the servers. This info
-// can be obtained by executing, for example, $ ping twitter.com on
-// a terminal on your PC
-//char google_ip[] = {74,125,67,100};	// Google
-//char twitter_ip[] = {128,121,146,100};	// Twitter
-char service_ip[] = {10,0,0,9};
-int  service_port = 8515;
+// IP Address for www.weather.gov  
+uint8 ip[] = {140,90,113,200};
 
-// This string can be used to send a request to Twitter.com to update your status
-// It will need a valid Authorization string which can be derived from your
-// Twitter.com username and password using Base64 algorithm
-// See, http://en.wikipedia.org/wiki/Basic_access_authentication
-// You need to replace <-!!-Authorization String-!!-> with a valid string before
-// using this sample sketch.
-// The Content-Length variable should equal the length of the data string
-// In the example below, "Content-Length: 21" corresponds to "status=Ready to sleep"
-//   const prog_char twitter[] PROGMEM = {"POST /statuses/update.xml HTTP/1.1\r\nAuthorization: Basic <-!!-Authorization String-!!->\r\nUser-Agent: uIP/1.0\r\nHost: twitter.com\r\nContent-Length: 21\r\nContent-Type: application/x-www-form-urlencoded\r\n\r\nstatus=Ready to sleep"};
+// A request that gets the latest METAR weather data for LAX
+GETrequest getWeather(ip, 80, "www.weather.gov", "/data/METAR/KLAX.1.txt");
 
-void loop()
-{
-	// if this is the first iteration
-	// send the request
-	if (loop_cnt == 0) {
-		webclient_get(service_ip, service_port, "/");
-		webclient_close();
-        loop_cnt = 1;
-	}
-	
-	WiFi.run();
+
+void setup() {
+    // Initialize WiServer (we'll pass NULL for the page serving function since we don't need to serve web pages) 
+  WiServer.init(NULL);
+  
+  // Enable Serial output and ask WiServer to generate log messages (optional)
+  Serial.begin(57600);
+  WiServer.enableVerboseMode(true);
+
+  // Have the processData function called when data is returned by the server
+  getWeather.setReturnFunc(printData);
+}
+
+
+// Time (in millis) when the data should be retrieved 
+long updateTime = 0;
+
+void loop(){
+
+  // Check if it's time to get an update
+  if (millis() >= updateTime) {
+    getWeather.submit();    
+    // Get another update one hour from now
+    updateTime += 1000 * 60 * 60;
+  }
+  
+  // Run WiServer
+  WiServer.server_task();
+ 
+  delay(10);
 }

@@ -45,10 +45,10 @@
 //   (uncommented). Currently only APP_UDPAPP may be defined at the same time as any other APP_TYPE
 //
 //#define APP_WEBSERVER
-#define APP_WEBCLIENT
+//#define APP_WEBCLIENT
 //#define APP_SOCKAPP
 //#define APP_UDPAPP
-//#define APP_WISERVER
+#define APP_WISERVER
 
 //
 // Add on features; uncomment to enable additional functionality
