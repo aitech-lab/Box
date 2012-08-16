@@ -6,8 +6,8 @@ bottle.debug(True)
 @route('/')
 def home():
     try:
-        return "Helo Shurik!"
+        return "Hello Arduino!"
     except Exception, e:
         print e
 
-run(host='10.0.0.9', port=8515, reloader=True)
+run(host='193.232.102.70', port=8515, reloader=True)
