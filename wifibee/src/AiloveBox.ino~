@@ -59,8 +59,6 @@ void setup() {
   Serial.println("WebServer Init");
   // Initialize WiServer (we'll pass NULL for the page serving function since we don't need to serve web pages) 
   WiServer.init(NULL);
-  Serial.println("WebServer Init complete");
-  
   
   // Enable Serial output and ask WiServer to generate log messages (optional)
   WiServer.enableVerboseMode(true);
