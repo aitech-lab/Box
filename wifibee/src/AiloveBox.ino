@@ -43,6 +43,7 @@ void printData(char* data, int len) {
     Serial.print(*(data++));
   } 
   Serial.println("END");
+  led_B(16); led_G(0);
   waitServerResponse = false;
 }
 
@@ -53,14 +54,46 @@ uint8 ip[] = {193,232,102,70};
 // A request that gets the latest METAR weather data for LAX
 GETrequest pingServer(ip, 8515, "193.232.102.70", "/");
 
+void led_rgbrgb(int rep=1){
+	for(int j=0; j<rep; j++) {
+		for(int i=5; i<=7; i++) {
+			//Serial.print("Pin "+String(i)+" on ");
+			pinMode(i, OUTPUT);      
+			digitalWrite(i, HIGH);  
+			delay(200);
+			digitalWrite(i, LOW);  
+		} 
+	}
+}
+
+#define R 5
+#define G 7
+#define B 6
+#define RED_BUTTON 15
+
+inline void led_R(int val) {
+	analogWrite(R, val); 
+}
+
+inline void led_G(int val) {
+	analogWrite(G, val); 
+}
+
+inline void led_B(int val) {
+	analogWrite(B, val); 
+}
 
 void setup() {
   Serial.begin(57600);
   Serial.println("WebServer Init");
+  led_rgbrgb(3);
+  led_R(16);
   // Initialize WiServer (we'll pass NULL for the page serving function since we don't need to serve web pages) 
   WiServer.init(NULL);
-  Serial.println("WebServer Init complete");
   
+  led_rgbrgb(3);
+  led_B(16);
+  Serial.println("WebServer Init complete");
   
   // Enable Serial output and ask WiServer to generate log messages (optional)
   WiServer.enableVerboseMode(true);
@@ -73,18 +106,15 @@ void setup() {
 // Time (in millis) when the data should be retrieved 
 
 
-void loop(){
-  static long updateTime = millis();
+void loop() {
+  int buttonState = digitalRead(RED_BUTTON);
   // Check if it's time to get an update
-  long time = millis();
-  if (time >= updateTime && !waitServerResponse) {
-    Serial.println("Ping Server");
-    waitServerResponse = true;
-    pingServer.submit();    
-    // Get another update one hour from now
-    updateTime = time+1000 * 10;
+  if(buttonState == LOW && !waitServerResponse) {
+	Serial.println("Ping Server");
+	waitServerResponse = true;
+	pingServer.submit();    
+	led_G(255); led_B(0);
   }
-  
   // Run WiServer
   WiServer.server_task();
  
