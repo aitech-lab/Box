@@ -1,4 +1,0 @@
-[ Mars [ Curiousity[ cameraA2E2-ON ] ] ];
-[ Mars [ Curiousity[ cameraA2E2-OFF ] ] ];
-[ Orbit 559km [ Hubble [ "Hi! I see you!" ] ] ];
-
