@@ -6,6 +6,7 @@
 #include <WiServer.h>
 
 // Wireless configuration parameters ----------------------------------------
+/*
 unsigned char local_ip[]    = {192,168,4,162};   // IP address of WiShield
 unsigned char gateway_ip[]  = {192,168,4,  1};   // router or gateway IP address
 unsigned char subnet_mask[] = {255,255,255,0}; // subnet mask for the local network
@@ -14,6 +15,16 @@ unsigned char security_type = 3;               // 0 - open; 1 - WEP; 2 - WPA; 3 
 
 // WPA/WPA2 passphrase
 const prog_char security_passphrase[] PROGMEM = {"shaiShei5do8ev9u"};	// max 64 characters
+*/
+
+unsigned char local_ip[]    = {10,0,0,15};   // IP address of WiShield
+unsigned char gateway_ip[]  = {10,0,0, 1};   // router or gateway IP address
+unsigned char subnet_mask[] = {255,255,255,0}; // subnet mask for the local network
+char ssid[]                 = {"fuckoff"   };   // max 32 bytes
+unsigned char security_type = 3;               // 0 - open; 1 - WEP; 2 - WPA; 3 - WPA2
+
+// WPA/WPA2 passphrase
+const prog_char security_passphrase[] PROGMEM = {"qazwsxed"};	// max 64 characters
 
 // WEP 128-bit keys
 prog_uchar wep_keys[] PROGMEM = { 
@@ -43,16 +54,15 @@ void printData(char* data, int len) {
     Serial.print(*(data++));
   } 
   Serial.println("END");
-  led_B(16); led_G(0);
+  led_G(0);
   waitServerResponse = false;
 }
 
-
-// IP Address for www.weather.gov  
-uint8 ip[] = {193,232,102,70};
+// CHANGE IT
+uint8 ip[] = {10,0,0,9};
 
 // A request that gets the latest METAR weather data for LAX
-GETrequest pingServer(ip, 8515, "193.232.102.70", "/");
+GETrequest pingServer(ip, 8515, "10.0.0.9", "/");
 
 void led_rgbrgb(int rep=1){
 	for(int j=0; j<rep; j++) {
@@ -91,8 +101,8 @@ void setup() {
   // Initialize WiServer (we'll pass NULL for the page serving function since we don't need to serve web pages) 
   WiServer.init(NULL);
   
-  led_rgbrgb(3);
-  led_B(16);
+  led_rgbrgb(1);
+  
   Serial.println("WebServer Init complete");
   
   // Enable Serial output and ask WiServer to generate log messages (optional)
@@ -107,13 +117,43 @@ void setup() {
 
 
 void loop() {
+  
+  static const char cos_a[] = {
+    16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 15, 15, 
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 14, 14, 14, 14, 14, 14, 14, 
+    13, 13, 13, 13, 13, 13, 13, 12, 12, 12, 12, 12, 12, 11, 11, 11, 
+    11, 11, 10, 10, 10, 10, 10, 10, 9, 9, 9, 9, 9, 8, 8, 8, 
+    8, 8, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 5, 5, 5, 5, 
+    5, 5, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 2, 2, 
+    2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 
+    3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 
+    5, 5, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 8, 8, 8, 8, 
+    8, 9, 9, 9, 9, 9, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 
+    11, 12, 12, 12, 12, 12, 12, 13, 13, 13, 13, 13, 13, 13, 14, 14, 
+    14, 14, 14, 14, 14, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 
+    16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16};
+  static unsigned char cos_id = 0;
   int buttonState = digitalRead(RED_BUTTON);
   // Check if it's time to get an update
+  
+  if (!waitServerResponse) {
+    cos_id++;
+    led_B(cos_a[cos_id]);
+    led_R(0);
+    //led_R(cos_a[(unsigned char)(cos_id+128)]);
+  } else {
+    cos_id+=8;
+    led_B(cos_a[cos_id]);
+    led_R(cos_a[cos_id]);
+  }
+  
   if(buttonState == LOW && !waitServerResponse) {
 	Serial.println("Ping Server");
 	waitServerResponse = true;
 	pingServer.submit();    
-	led_G(255); led_B(0);
   }
   // Run WiServer
   WiServer.server_task();
