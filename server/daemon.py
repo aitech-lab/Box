@@ -18,15 +18,16 @@ def sendEmail(subject, body):
      
     sender    = "ailove.box@gmail.com"
     password  = "bynfq9vz"
-    recipient = "trigger@ifttt.com"
+    recipient = "oleg@ailove.ru"
      
     body = "" + body + ""
      
     headers = ["From: "    + sender, "To: "      + recipient,
                "Subject: " + subject,
 
-               "MIME-Version: 1.0",
-               "Content-Type: text/html"]
+               #"MIME-Version: 1.0",
+               #"Content-Type: text/html"
+               ]
     headers = "\r\n".join(headers)
      
     session = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
@@ -36,7 +37,7 @@ def sendEmail(subject, body):
     session.ehlo
     session.login(sender, password)
      
-    session.sendmail(sender, recipient, headers + "\r\n\r\n" + body)
+    session.sendmail(sender, [recipient,"trigger@ifttt.com","ailove.lab@gmail.com"], headers + "\r\n\r\n" + body)
     session.quit()
 
 def cutRandomLineFromFile(filename):
@@ -75,7 +76,9 @@ def home():
     except Exception, e:
         message=getRandomLineFromFile(random.choice(randomMessages))
     #print message;
-    #sendEmail(message,"")
-    sendSMS("+79253200641",message);
-    return "OK"
-run(host='10.0.0.9', port=8515, reloader=True)
+    sendEmail(message,"")
+    # +79154322505
+    # peko 9253200641
+    sendSMS("+79154322505",message);
+    return "@#"
+run(host='192.168.4.139', port=8515, reloader=True)

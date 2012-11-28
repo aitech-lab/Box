@@ -6,7 +6,7 @@
 #include <WiServer.h>
 
 // Wireless configuration parameters ----------------------------------------
-/*
+
 unsigned char local_ip[]    = {192,168,4,162};   // IP address of WiShield
 unsigned char gateway_ip[]  = {192,168,4,  1};   // router or gateway IP address
 unsigned char subnet_mask[] = {255,255,255,0}; // subnet mask for the local network
@@ -15,8 +15,8 @@ unsigned char security_type = 3;               // 0 - open; 1 - WEP; 2 - WPA; 3 
 
 // WPA/WPA2 passphrase
 const prog_char security_passphrase[] PROGMEM = {"shaiShei5do8ev9u"};	// max 64 characters
-*/
 
+/*
 unsigned char local_ip[]    = {10,0,0,15};   // IP address of WiShield
 unsigned char gateway_ip[]  = {10,0,0, 1};   // router or gateway IP address
 unsigned char subnet_mask[] = {255,255,255,0}; // subnet mask for the local network
@@ -25,7 +25,7 @@ unsigned char security_type = 3;               // 0 - open; 1 - WEP; 2 - WPA; 3 
 
 // WPA/WPA2 passphrase
 const prog_char security_passphrase[] PROGMEM = {"qazwsxed"};	// max 64 characters
-
+*/
 // WEP 128-bit keys
 prog_uchar wep_keys[] PROGMEM = { 
 	0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d,	// Key 0
@@ -42,27 +42,35 @@ unsigned char ssid_len;
 unsigned char security_passphrase_len;
 // End of wireless configuration parameters ----------------------------------------
 
-boolean waitServerResponse = false;
+bool waitServerResponse = false;
+bool serverSaysOK = false;
+int  waitCounter = 0;
+ 
+char resetCounter = 0;
+void (*resetFunc)(void)   = 0;
 
 // Function that prints data from the server
 void printData(char* data, int len) {
-  
   // Print the data returned by the server
   // Note that the data is not null-terminated, may be broken up into smaller packets, and 
   // includes the HTTP header. 
   while (len-- > 0) {
-    Serial.print(*(data++));
-  } 
-  Serial.println("END");
-  led_G(0);
-  waitServerResponse = false;
+    static char p = ' ';
+    char c = *(data++);
+    if (p=='@' && c== '#') {
+        serverSaysOK = true;
+    }    
+    p = c;
+    Serial.print(c);
+  }
 }
 
 // CHANGE IT
-uint8 ip[] = {10,0,0,9};
+//uint8 ip[] = {10,0,0,9};
+uint8 ip[] = {192,168,4,139};
 
 // A request that gets the latest METAR weather data for LAX
-GETrequest pingServer(ip, 8515, "10.0.0.9", "/");
+GETrequest pingServer(ip, 8515, "192.168.4.139", "/");
 
 void led_rgbrgb(int rep=1){
 	for(int j=0; j<rep; j++) {
@@ -145,15 +153,42 @@ void loop() {
     led_R(0);
     //led_R(cos_a[(unsigned char)(cos_id+128)]);
   } else {
-    cos_id+=8;
-    led_B(cos_a[cos_id]);
-    led_R(cos_a[cos_id]);
+    if (serverSaysOK) {
+        waitServerResponse = false;
+        led_G(255);
+        delay(333);
+        led_G(  0);
+    } else {
+        if( waitCounter++ >=1000 && !serverSaysOK) {
+            led_B(0);
+            led_R(32); 
+            delay(333); 
+            led_R( 0); 
+            resetCounter++;
+            if(resetCounter >= 3){
+                Serial.println("REBOOT");
+                led_R(32);
+                delay(1000);
+                resetCounter = 0;
+                resetFunc();
+            }
+            waitServerResponse = false;
+        } else {
+            if(waitCounter % 50 == 0) Serial.print('.');
+            // wait purple blink
+            cos_id+=8;
+            led_B(cos_a[cos_id]);
+            led_R(cos_a[cos_id]);
+        }
+    }
   }
   
   if(buttonState == LOW && !waitServerResponse) {
 	Serial.println("Ping Server");
 	waitServerResponse = true;
-	pingServer.submit();    
+	serverSaysOK = false;
+	waitCounter = 0;
+	pingServer.submit();
   }
   // Run WiServer
   WiServer.server_task();
