@@ -14,7 +14,7 @@ char ssid[]                 = {"ailove_g"   };   // max 32 bytes
 unsigned char security_type = 3;               // 0 - open; 1 - WEP; 2 - WPA; 3 - WPA2
 
 // WPA/WPA2 passphrase
-const prog_char security_passphrase[] PROGMEM = {"shaiShei5do8ev9u"};	// max 64 characters
+const prog_char security_passphrase[] PROGMEM = {"..."};	// max 64 characters
 
 /*
 unsigned char local_ip[]    = {10,0,0,15};   // IP address of WiShield
@@ -24,7 +24,7 @@ char ssid[]                 = {"fuckoff"   };   // max 32 bytes
 unsigned char security_type = 3;               // 0 - open; 1 - WEP; 2 - WPA; 3 - WPA2
 
 // WPA/WPA2 passphrase
-const prog_char security_passphrase[] PROGMEM = {"qazwsxed"};	// max 64 characters
+const prog_char security_passphrase[] PROGMEM = {"..."};	// max 64 characters
 */
 // WEP 128-bit keys
 prog_uchar wep_keys[] PROGMEM = { 
