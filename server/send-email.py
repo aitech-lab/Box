@@ -7,7 +7,7 @@ SMTP_SERVER = 'smtp.gmail.com'
 SMTP_PORT = 587
  
 sender = 'ailove.box@gmail.com'
-password = "bynfq9vz"
+password = "..."
 recipient = 'trigger@ifttt.com'
 subject = u"Проверка @gasubasu #hashtags".encode("utf-8")
 body = u"тело письма".encode("utf-8")
