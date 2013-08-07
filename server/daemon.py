@@ -17,7 +17,7 @@ def sendEmail(subject, body):
     SMTP_PORT = 587
      
     sender    = "ailove.box@gmail.com"
-    password  = "bynfq9vz"
+    password  = "..."
     recipient = "oleg@ailove.ru"
      
     body = "" + body + ""
